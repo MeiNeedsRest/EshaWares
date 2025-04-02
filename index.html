@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Esha's Wares • FFXIV@Louisoix</title>
+  <script src="https://xemantic.github.io/shader-web-background/dist/shader-web-background.min.js"></script>
+  <script type="x-shader/x-fragment" id="image">
+    precision mediump float;
+    #define SPIN_EASE 0.8
+    #define spin_time 5.
+    #define spin_amount 0.3
+    #define contrast 3.
+
+    // #define PIXEL_SIZE_FAC 700.
+
+    // default colours
+    // #define colour_1 vec4(1.0,0.3725490196,0.3333333333,1.0)
+    // #define colour_2 vec4(0.0,0.6156862745,1.0,1.0)
+    // #define colour_3 vec4(0.2156862745,0.2588235294,0.2666666667,1.0)
+    
+    #define colour_1 vec4(0.47,0.08,0.91,1.0)
+    #define colour_2 vec4(0.71,0.57,0.86,1.0)
+    #define colour_3 vec4(0.2156862745,0.2588235294,0.2666666667,1.0)
+
+    uniform vec2 iResolution;
+    uniform float iTime;
+
+    void main( )
+    {
+      // uncomment to enable pixelated bg
+      // float pixel_size = length(iResolution.xy)/PIXEL_SIZE_FAC;
+      float pixel_size = 1.0;
+      vec2 uv = (floor(gl_FragCoord.xy*(1./pixel_size))*pixel_size - 0.5*iResolution.xy)/length(iResolution.xy) - vec2(0.12, 0.);
+      
+      float uv_len = length(uv);
+      
+      float speed = (spin_time*SPIN_EASE*0.2) + 302.2;
+      float new_pixel_angle = (atan(uv.y, uv.x)) + speed - SPIN_EASE*20.*(1.*spin_amount*uv_len + (1. - 1.*spin_amount));
+      
+      vec2 mid = vec2(0.5, 0.5);
+      uv = (vec2((uv_len * cos(new_pixel_angle) + mid.x), (uv_len * sin(new_pixel_angle) + mid.y)) - mid);
+      
+      uv *= 30.;
+      speed = iTime*(2.);
+      vec2 uv2 = vec2(uv.x+uv.y);
+
+      for(int i=0; i < 5; i++) {
+        uv2 += sin(max(uv.x, uv.y)) + uv;
+        uv  += 0.5*vec2(cos(5.1123314 + 0.353*uv2.y + speed*0.131121),sin(uv2.x - 0.113*speed));
+        uv  -= 1.0*cos(uv.x + uv.y) - 1.0*sin(uv.x*0.711 - uv.y);
+      }
+      
+      float contrast_mod = (0.25*contrast + 0.5*spin_amount + 1.2);
+      float paint_res =min(2., max(0.,length(uv)*(0.035)*contrast_mod));
+      float c1p = max(0.,1. - contrast_mod*abs(1.-paint_res));
+      float c2p = max(0.,1. - contrast_mod*abs(paint_res));
+      float c3p = 1. - min(1., c1p + c2p);
+
+      // Output to screen
+      gl_FragColor = (0.3/contrast)*colour_1 + (1. - 0.3/contrast)*(colour_1*c1p + colour_2*c2p + vec4(c3p*colour_3.rgb, c3p*colour_1.a));
+    }
+  </script>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <script>
+    let t = 0;
+    requestAnimationFrame(function update() {
+      t += 1 / 120;
+      requestAnimationFrame(update);
+    });
+    shaderWebBackground.shade({
+      shaders: {
+        image: {
+          uniforms: {
+            iResolution: (gl, loc, ctx) => gl.uniform2f(loc, ctx.width, ctx.height),
+            iTime: (gl, loc, ctx) => gl.uniform1f(loc, t)
+          }
+        }
+      }
+    });
+  </script>
+  <script>
+    var currentPopup = null;
+    function popupFunction(id) {
+      if (currentPopup && currentPopup !== id.id) {
+        document.getElementById(currentPopup).classList.remove("show");
+      }
+      currentPopup = id.id;
+      id.classList.toggle("show");
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const tabButtons = document.querySelectorAll('.tab-button');
+      const tabTables = document.querySelectorAll('.tab-table');
+
+      tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          // Remove active class from all buttons and tables
+          tabButtons.forEach(btn => btn.classList.remove('active'));
+          tabTables.forEach(table => table.classList.remove('active'));
+
+          // Add active class to the clicked button and corresponding table
+          button.classList.add('active');
+          const tabId = button.getAttribute('data-tab');
+          document.getElementById(tabId).classList.add('active');
+        });
+      });
+    });
+  </script>
+  <div class="bg">
+  </div>
+  <main>
+    <h1>Esha's Wares (EU/Chaos)</h1>
+    <img width="50%" src="img/esha-space.png">
+    <br>
+    <h2>Delivering to you even in outer space!</h2>
+    <p>(Or, alternatively, on Materia, for non EU players)</p>
+    <br>
+    <h2>Omnicrafter and Omnigatherer, at your service!</h2>
+    <br>
+    <h3>iLvl 740 Sets, Foods and Pots, at prices you'll (hopefully) love!</h3>
+    <br>
+    <h2>THE DETAILS</h2>
+    <br>
+    <p>
+      Expert crafts require Tomestone-sourced materials that can be expensive to buy.<br>
+      This is why I offer discounts on the crafts that require them<br>
+      if you can provide those materials yourself.<br><br>
+      The requirements vary per set, and are listed below.<br>
+    </p>
+    <br>
+    <a href="#customorder" id="jump">Click here if you need a more custom order instead</a>
+    <br>
+    <br>
+    <p>The sets don't include the weapon.<br>Each of them cost an additional 200 Tomestones (120+80 for PLD)</p>
+    <p>They do include the accessories.</p>
+    <br>
+    <p>You can click on an item name to see its name in other languages</p>
+    <div class="tab-container">
+      <div class="tabs">
+        <button class="tab-button active" data-tab="fending-maiming">Tanks (Fending)</button>
+        <button class="tab-button" data-tab="fending-maiming">Dragoon & Reaper (Maiming)</button>
+        <button class="tab-button" data-tab="striking-aiming-scouting">Monk & Samourai (Striking)</button>
+        <button class="tab-button" data-tab="striking-aiming-scouting">Ranged (Aiming)</button>
+        <button class="tab-button" data-tab="striking-aiming-scouting">Ninja & Viper (Scouting)</button>
+        <button class="tab-button" data-tab="healing-casting">Healers (Healing)</button>
+        <button class="tab-button" data-tab="healing-casting">Casters (Casting)</button>
+        <button class="tab-button" data-tab="potions">Potions</button>
+      </div>
+      <div class="tab-content">
+        <table id="fending-maiming" class="tab-table active">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Quantity (Tomestone Cost)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="popup" onclick="popupFunction(coke)">Shaaloani Coke
+                  <span class="popuptext" id="coke">Shaaloani-Koks<br>Charbon de Shaaloani<br>シャーローニ・コークス</span>
+                </span>
+              </td>
+              <td>12 (240)</td>
+            </tr>
+            <tr>
+              <td><span class="popup" onclick="popupFunction(abrasive)">Neo Abrasive
+                  <span class="popuptext" id="abrasive">Neu-Alexandria-Schleifstein<br>Pierre à aiguiser du nouveau
+                    royaume<br>新王国の研磨剤</span>
+                </span>
+              </td>
+              <td>10 (200)</td>
+            </tr>
+            <tr>
+              <td><span class="popup" onclick="popupFunction(preservative)">Hydrophobic Preservative
+                  <span class="popuptext" id="preservative">Antiseptisches Holzschutzmittel<br>Enduit de
+                    conservation<br>浸透性防腐塗料</span>
+                </span>
+              </td>
+              <td>10 (200)</td>
+            </tr>
+            <tr>
+              <td><span class="popup" onclick="popupFunction(pelt)">Diatryma Pelt
+                  <span class="popuptext" id="pelt">Diatryma-Daunen<br>Poils de Diatryma<br>ディアトリマの毛</span>
+                </span>
+              </td>
+              <td>14 (280)</td>
+            </tr>
+            <tr>
+              <td><span class="popup" onclick="popupFunction(skin)">Cronopio Skin
+                  <span class="popuptext" id="skin">Cronopio-Haut<br>Peau de cronopio<br>クロノピオの粗皮</span>
+                </span>
+              </td>
+              <td>12 (240)</td>
+            </tr>
+            <tr>
+              <td>Total (in Tomestones)</td>
+              <td>1160</td>
+            </tr>
+          </tbody>
+        </table>
+        <table id="striking-aiming-scouting" class="tab-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Quantity (Tomestone Cost)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="popup" onclick="popupFunction(coke2)">Shaaloani Coke
+                  <span class="popuptext" id="coke2">Shaaloani-Koks<br>Charbon de Shaaloani<br>シャーローニ・コークス</span>
+                </span>
+              </td>
+              <td>6 (120)</td>
+            </tr>
+            <tr>
+              <td><span class="popup" onclick="popupFunction(abrasive2)">Neo Abrasive
+                  <span class="popuptext" id="abrasive2">Neu-Alexandria-Schleifstein<br>Pierre à aiguiser du nouveau
+                    royaume<br>新王国の研磨剤</span>
+                </span>
+              </td>
+              <td>12 (240)</td>
+            </tr>
+            <tr>
+              <td><span class="popup" onclick="popupFunction(preservative2)">Hydrophobic Preservative
+                  <span class="popuptext" id="preservative2">Antiseptisches Holzschutzmittel<br>Enduit de
+                    conservation<br>浸透性防腐塗料</span>
+                </span>
+              </td>
+              <td>10 (200)</td>
+            </tr>
+            <tr>
+              <td><span class="popup" onclick="popupFunction(pelt2)">Diatryma Pelt
+                  <span class="popuptext" id="pelt2">Diatryma-Daunen<br>Poils de Diatryma<br>ディアトリマの毛</span>
+                </span>
+              </td>
+              <td>18 (360)</td>
+            </tr>
+            <tr>
+              <td><span class="popup" onclick="popupFunction(skin2)">Cronopio Skin
+                  <span class="popuptext" id="skin2">Cronopio-Haut<br>Peau de cronopio<br>クロノピオの粗皮</span>
+                </span>
+              </td>
+              <td>12 (240)</td>
+            </tr>
+            <tr>
+              <td>Total (in Tomestones)</td>
+              <td>1160</td>
+            </tr>
+          </tbody>
+        </table>
+        <table id="healing-casting" class="tab-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Quantity (Tomestone Cost)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="popup" onclick="popupFunction(coke3)">Shaaloani Coke
+                  <span class="popuptext" id="coke3">Shaaloani-Koks<br>Charbon de Shaaloani<br>シャーローニ・コークス</span>
+                </span>
+              </td>
+              <td>2 (40)</td>
+            </tr>
+            <tr>
+              <td><span class="popup" onclick="popupFunction(abrasive3)">Neo Abrasive
+                  <span class="popuptext" id="abrasive3">Neu-Alexandria-Schleifstein<br>Pierre à aiguiser du nouveau
+                    royaume<br>新王国の研磨剤</span>
+                </span>
+              </td>
+              <td>8 (160)</td>
+            </tr>
+            <tr>
+              <td><span class="popup" onclick="popupFunction(preservative3)">Hydrophobic Preservative
+                  <span class="popuptext" id="preservative3">Antiseptisches Holzschutzmittel<br>Enduit de
+                    conservation<br>浸透性防腐塗料</span>
+                </span>
+              </td>
+              <td>10 (200)</td>
+            </tr>
+            <tr>
+              <td><span class="popup" onclick="popupFunction(pelt3)">Diatryma Pelt
+                  <span class="popuptext" id="pelt3">Diatryma-Daunen<br>Poils de Diatryma<br>ディアトリマの毛</span>
+                </span>
+              </td>
+              <td>20 (400)</td>
+            </tr>
+            <tr>
+              <td><span class="popup" onclick="popupFunction(skin3)">Cronopio Skin
+                  <span class="popuptext" id="skin3">Cronopio-Haut<br>Peau de cronopio<br>クロノピオの粗皮</span>
+                </span>
+              </td>
+              <td>18 (360)</td>
+            </tr>
+            <tr>
+              <td>Total (in Tomestones)</td>
+              <td>1160</td>
+            </tr>
+          </tbody>
+        </table>
+        <table id="potions" class="tab-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Quantity (Tomestone Cost)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="popup" onclick="popupFunction(compound)">Dichromatic Compound
+                  <span class="popuptext" id="compound">Kunterbunte Tinktur<br>Potion alchimique
+                    multicolore<br>多色錬金薬</span>
+                </span></td>
+              <td>1 (20) per 3</td>
+            </tr>
+            <tr>
+              <td>Note:</td>
+              <td>Please order them in bulk of at least 30!</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <br>
+      <p>Foods require Orange Crafters' Scrips, not Tomestones!<br>I can procure those myself.</p>
+    </div>
+    <br>
+    <h2 id="customorder">Custom Order</h2>
+    <br>
+    <p>
+      Only need a few items instead of a full set?<br>
+      Or something completely different?<br>
+      I can do that too!<br><br>
+      Just send me a message on Discord or Bluesky, or a DM in game if I'm on,<br>
+      tell me about your exact needs,<br>
+      and I'll get back to you as soon as possible!
+    </p>
+    <br>
+    <p id="contact">
+      <img src="img/discord.png" class="inline-img"> Discord: meineeds.rest<br>
+      <img src="img/bsky.png" class="inline-img"> Bluesky: @meineeds.rest<br>
+      <img src="img/ffxiv.png" class="inline-img"> In game: Esha Malkir@Louisoix<br>
+    </p>
+  </main>
+</body>
+
+</html>
